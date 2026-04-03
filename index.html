@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎉 Fun Dihybrid Cross Explorer! 🧬</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+
+        :root {
+            --bg-color: #f0f8ff;
+            --primary: #ff6b6b;
+            --secondary: #4ecdc4;
+            --accent: #ffe66d;
+            --text-dark: #2d3436;
+            --yellow-pea: #ffd32a;
+            --green-pea: #0be881;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            color: var(--text-dark);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            width: 100%;
+            text-align: center;
+            padding: 25px 0;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            border-bottom: 5px dashed white;
+        }
+
+        h1 { margin: 0; font-size: 2.5em; text-shadow: 2px 2px 0px rgba(0,0,0,0.2); }
+        header p { font-size: 1.2em; margin-top: 10px; font-weight: bold; }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            width: 95%;
+            max-width: 1200px;
+            margin-top: 30px;
+            gap: 25px;
+            padding-bottom: 50px;
+        }
+
+        .main-content {
+            flex: 2;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 4px solid white;
+        }
+
+        .sidebar {
+            flex: 1;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            height: 650px;
+            border: 4px solid var(--secondary);
+            overflow: hidden;
+        }
+
+        h2 { border-bottom: 4px dotted var(--secondary); padding-bottom: 10px; color: var(--primary); }
+
+        /* Punnett Square Styles */
+        .punnett-grid {
+            display: grid;
+            grid-template-columns: 70px repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 25px;
+        }
+
+        .cell {
+            border: 3px solid #dfe6e9;
+            border-radius: 12px;
+            height: 90px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            background-color: #f5f6fa;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .cell:hover:not(.header-cell):not(.revealed) {
+            transform: scale(1.1) rotate(3deg);
+            background-color: var(--accent);
+            border-color: var(--primary);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+        }
+
+        .header-cell {
+            background-color: var(--secondary);
+            color: white;
+            cursor: default;
+            font-size: 1.3em;
+            border: none;
+        }
+
+        .revealed {
+            background-color: white !important;
+            animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Pea Visuals - Now with Emojis! */
+        .pea {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            box-shadow: inset -3px -3px 6px rgba(0,0,0,0.2), 2px 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .round { border-radius: 50%; }
+        .round::after { content: '😎'; }
+        
+        .wrinkled { 
+            border-radius: 40% 60% 55% 45% / 45% 50% 55% 50%; 
+            border: 2px dashed rgba(0,0,0,0.3); 
+        }
+        .wrinkled::after { content: '🥴'; font-size: 0.9em; }
+
+        .yellow { background-color: var(--yellow-pea); }
+        .green { background-color: var(--green-pea); }
+
+        /* Chat Styles */
+        .chat-header {
+            background: var(--secondary);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-weight: 900;
+            font-size: 1.3em;
+            letter-spacing: 1px;
+        }
+
+        .chat-box {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: #fafafa;
+        }
+
+        .message { padding: 12px 18px; border-radius: 20px; max-width: 85%; line-height: 1.5; font-weight: bold; font-size: 1.05em; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .bot-msg { background-color: #e3f2fd; align-self: flex-start; border-bottom-left-radius: 5px; border: 2px solid #bbdefb; }
+        .user-msg { background-color: var(--primary); color: white; align-self: flex-end; border-bottom-right-radius: 5px; }
+
+        .chat-input {
+            display: flex;
+            padding: 15px;
+            background: white;
+            border-top: 3px solid #eee;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            outline: none;
+            font-family: 'Nunito', sans-serif;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        .chat-input input:focus { border-color: var(--secondary); }
+
+        .chat-input button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            margin-left: 10px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 900;
+            font-size: 1em;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        .chat-input button:hover { background-color: #ff5252; transform: scale(1.05); }
+
+        .stats-panel {
+            display: flex;
+            justify-content: space-around;
+            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 30px;
+            border: 2px dashed #ced4da;
+        }
+
+        .stat-box { text-align: center; font-weight: bold; }
+        .stat-num { font-size: 2.5em; font-weight: 900; color: var(--primary); text-shadow: 1px 1px 0px rgba(0,0,0,0.1); }
+
+        .reveal-btn {
+            display: block;
+            width: 100%;
+            margin-top: 25px;
+            padding: 15px;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2em;
+            font-weight: 900;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+            box-shadow: 0 6px 0 #38ada5;
+        }
+        
+        .reveal-btn:hover { transform: translateY(2px); box-shadow: 0 4px 0 #38ada5; background: #45bdbc; }
+        .reveal-btn:active { transform: translateY(6px); box-shadow: none; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🌱 Fun Dihybrid Cross Explorer! 🧬</h1>
+        <p>✨ Click the mystery squares to see the magic of genetics happen! ✨</p>
+    </header>
+
+    <div class="container">
+        <div class="main-content">
+            <h2>🎲 The Ultimate F2 Punnett Square</h2>
+            <p><strong>Parents:</strong> RrYy (Round Yellow 😎) ❌ RrYy (Round Yellow 😎)</p>
+            <p><em>👉 Boop any gray square below to simulate fertilization!</em></p>
+            
+            <div class="punnett-grid" id="grid">
+                <div class="cell header-cell" style="background: transparent;"></div>
+                <div class="cell header-cell">RY</div>
+                <div class="cell header-cell">Ry</div>
+                <div class="cell header-cell">rY</div>
+                <div class="cell header-cell">ry</div>
+
+                </div>
+
+            <div class="stats-panel">
+                <div class="stat-box">
+                    <div class="pea round yellow" style="margin: 0 auto;"></div>
+                    <div class="stat-num" id="count-9">0</div>
+                    <div>Round Yellow</div>
+                </div>
+                <div class="stat-box">
+                    <div class="pea round green" style="margin: 0 auto;"></div>
+                    <div class="stat-num" id="count-3a">0</div>
+                    <div>Round Green</div>
+                </div>
+                <div class="stat-box">
+                    <div class="pea wrinkled yellow" style="margin: 0 auto;"></div>
+                    <div class="stat-num" id="count-3b">0</div>
+                    <div>Wrinkled Yellow</div>
+                </div>
+                <div class="stat-box">
+                    <div class="pea wrinkled green" style="margin: 0 auto;"></div>
+                    <div class="stat-num" id="count-1">0</div>
+                    <div>Wrinkled Green</div>
+                </div>
+            </div>
+            <button class="reveal-btn" onclick="revealAll()">🚀 Reveal All Peas! 🚀</button>
+        </div>
+
+        <div class="sidebar">
+            <div class="chat-header">🤖 MendelBot 3000 ✨</div>
+            <div class="chat-box" id="chat-box">
+                <div class="message bot-msg">
+                    HI THERE! 👋 I'm MendelBot! I love talking about genetics! 🧬<br><br>
+                    Try asking me about:<br>
+                    ✨ The secret <strong>9:3:3:1</strong> code!<br>
+                    ✨ What <strong>Genotype</strong> means!<br>
+                    ✨ The bossy <strong>Dominant</strong> traits!<br>
+                    Let's chat! 💬
+                </div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="user-input" placeholder="Type your awesome question..." onkeypress="handleEnter(event)">
+                <button onclick="sendMessage()">SEND 🚀</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- FUN PUNNETT SQUARE LOGIC ---
+        const gametes = ['RY', 'Ry', 'rY', 'ry'];
+        const grid = document.getElementById('grid');
+        
+        let counts = { 'RY': 0, 'Ry': 0, 'rY': 0, 'ry': 0 };
+
+        function determinePhenotype(g1, g2) {
+            let genes = g1 + g2;
+            let isRound = genes.includes('R');
+            let isYellow = genes.includes('Y');
+            
+            let shape = isRound ? 'round' : 'wrinkled';
+            let color = isYellow ? 'yellow' : 'green';
+            let category = (isRound ? 'R' : 'r') + (isYellow ? 'Y' : 'y');
+
+            let r_alleles = (genes.match(/R/g) || []).join('') + (genes.match(/r/g) || []).join('');
+            let y_alleles = (genes.match(/Y/g) || []).join('') + (genes.match(/y/g) || []).join('');
+            let genotype = r_alleles + y_alleles;
+
+            return { shape, color, category, genotype };
+        }
+
+        function createGrid() {
+            gametes.forEach(g1 => {
+                let rowHeader = document.createElement('div');
+                rowHeader.className = 'cell header-cell';
+                rowHeader.innerText = g1;
+                grid.appendChild(rowHeader);
+
+                gametes.forEach(g2 => {
+                    let cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.g1 = g1;
+                    cell.dataset.g2 = g2;
+                    cell.innerText = "❓";
+                    cell.onclick = () => revealCell(cell);
+                    grid.appendChild(cell);
+                });
+            });
+        }
+
+        function revealCell(cell) {
+            if (cell.classList.contains('revealed')) return;
+            
+            let p = determinePhenotype(cell.dataset.g1, cell.dataset.g2);
+            
+            cell.innerHTML = `
+                <div class="pea ${p.shape} ${p.color}"></div>
+                <div style="color: #2d3436; font-size: 0.9em;">${p.genotype}</div>
+            `;
+            cell.classList.add('revealed');
+
+            counts[p.category]++;
+            updateStats();
+        }
+
+        function revealAll() {
+            let delay = 0;
+            document.querySelectorAll('.cell:not(.header-cell)').forEach(cell => {
+                if (!cell.classList.contains('revealed')) {
+                    setTimeout(() => revealCell(cell), delay);
+                    delay += 100; // Awesome cascading reveal effect!
+                }
+            });
+        }
+
+        function updateStats() {
+            document.getElementById('count-9').innerText = counts['RY'];
+            document.getElementById('count-3a').innerText = counts['Ry'];
+            document.getElementById('count-3b').innerText = counts['rY'];
+            document.getElementById('count-1').innerText = counts['ry'];
+        }
+
+        createGrid();
+
+        // --- SUPER FUN AI CHATBOT LOGIC ---
+        const chatBox = document.getElementById('chat-box');
+        const userInput = document.getElementById('user-input');
+
+        const knowledgeBase = [
+            { keywords: ['ratio', '9:3:3:1', '9331', 'number'], answer: "OMG the 9:3:3:1 ratio is my FAVORITE! 🤩 Out of 16 peas, 9 get BOTH bossy dominant traits 😎, 3 get a mix, 3 get the OTHER mix, and only 1️⃣ special little pea gets double recessive traits 🥴! It's pure mathematical magic! ✨" },
+            { keywords: ['genotype', 'geno'], answer: "Genotype is the SECRET CODE! 🕵️‍♂️ It's the letters on the inside (like RrYy) that tell the plant how to grow. You can't see it, but it controls EVERYTHING! 🧬" },
+            { keywords: ['phenotype', 'pheno', 'look'], answer: "Phenotype is what the plant actually LOOKS like on the outside! 👀 Is it yellow? Is it round? That physical look is the phenotype! 🌻✨" },
+            { keywords: ['dominant', 'capital'], answer: "Dominant traits are the BOSS! 😎 They are the capital letters (like 'R'). If they show up, they completely hide the shy recessive traits! Talk about stealing the spotlight! 🌟" },
+            { keywords: ['recessive', 'lowercase', 'shy'], answer: "Recessive traits are the shy ones! 🥺 (Lowercase letters like 'r'). They ONLY show up if there are no bossy dominant traits around to hide them. That's why wrinkled green peas are so rare and special! 💚" },
+            { keywords: ['hello', 'hi', 'hey'], answer: "HELLO THERE GENETICS SUPERSTAR! 🌟 What awesome science questions do you have for me today?! 🧬✨" }
+        ];
+
+        function handleEnter(e) {
+            if (e.key === 'Enter') sendMessage();
+        }
+
+        function sendMessage() {
+            let text = userInput.value.trim().toLowerCase();
+            if (!text) return;
+
+            addMessage(userInput.value, 'user-msg');
+            userInput.value = '';
+
+            setTimeout(() => {
+                let response = findAnswer(text);
+                addMessage(response, 'bot-msg');
+            }, 600); // Dramatic typing pause...
+        }
+
+        function findAnswer(text) {
+            for (let entry of knowledgeBase) {
+                if (entry.keywords.some(kw => text.includes(kw))) {
+                    return entry.answer;
+                }
+            }
+            return "Whoa, that's a BIG brain question! 🧠💥 Since I'm just a mini-bot living in this webpage, I only know the basics of Mendel's peas 🌱. Ask me about the 9:3:3:1 ratio, or take that huge question back to the real Gemini AI! 🚀";
+        }
+
+        function addMessage(text, className) {
+            let msgDiv = document.createElement('div');
+            msgDiv.className = `message ${className}`;
+            msgDiv.innerHTML = text;
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    </script>
+</body>
+</html>
